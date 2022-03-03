@@ -1,0 +1,5 @@
+curl --socks5 localhost:1080 http://www.baidu.com
+curl --socks5 localhost:1080 https://www.baidu.com
+
+curl -x localhost:1081 https://www.baidu.com
+curl -x localhost:1081 https://www.baidu.com
