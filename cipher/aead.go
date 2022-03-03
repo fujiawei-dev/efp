@@ -20,10 +20,6 @@ func aeadConn(cipher cipher.AEAD) netp.ConnCipher {
 	return func(c net.Conn) net.Conn { return aead.NewConn(c, cipher) }
 }
 
-func aeadPacketConn(cipher cipher.AEAD) netp.PacketConnCipher {
-	return func(c net.PacketConn) net.PacketConn { return aead.NewPacketConn(c, cipher) }
-}
-
 func aesGCM(key []byte, nonceSize int) (cipher.AEAD, error) {
 	blk, err := aes.NewCipher(key)
 	if err != nil {

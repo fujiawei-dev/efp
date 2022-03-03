@@ -5,6 +5,7 @@
 ## Features
 
 - SOCKS5 proxy
+- Only supports TCP
 
 ## Basic Usage
 

@@ -22,10 +22,6 @@ func streamConn(cipher stream.Cipher) netp.ConnCipher {
 	return func(c net.Conn) net.Conn { return stream.NewConn(c, cipher) }
 }
 
-func streamPacketConn(cipher stream.Cipher) netp.PacketConnCipher {
-	return func(c net.PacketConn) net.PacketConn { return stream.NewPacketConn(c, cipher) }
-}
-
 type ctrStream struct{ cipher.Block }
 
 func (b *ctrStream) IVSize() int                       { return b.BlockSize() }
