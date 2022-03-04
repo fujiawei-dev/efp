@@ -37,7 +37,7 @@ func (w *writer) ReadFrom(r io.Reader) (n int64, err error) {
 		w.buf = make([]byte, bufSize)
 		iv := w.buf[:w.IVSize()]
 
-		if _, err = io.ReadFull(rand.Reader, iv); err != nil {
+		if _, err = rand.Read(iv); err != nil {
 			return
 		}
 
@@ -51,6 +51,14 @@ func (w *writer) ReadFrom(r io.Reader) (n int64, err error) {
 	for {
 		buf := w.buf
 		nr, er := r.Read(buf)
+
+		if er != nil {
+			if er != io.EOF { // ignore EOF as per io.ReaderFrom contract
+				err = er
+			}
+			return
+		}
+
 		if nr > 0 {
 			n += int64(nr)
 			buf = buf[:nr]
@@ -60,13 +68,6 @@ func (w *writer) ReadFrom(r io.Reader) (n int64, err error) {
 				err = ew
 				return
 			}
-		}
-
-		if er != nil {
-			if er != io.EOF { // ignore EOF as per io.ReaderFrom contract
-				err = er
-			}
-			return
 		}
 	}
 }
@@ -84,14 +85,15 @@ type reader struct {
 }
 
 // NewReader wraps an io.Reader with stream cipher decryption.
-func NewReader(r io.Reader, s Cipher) io.Reader {
-	return &reader{Reader: r, Cipher: s}
+func NewReader(r io.Reader, c Cipher) io.Reader {
+	return &reader{Reader: r, Cipher: c}
 }
 
 func (r *reader) Read(b []byte) (int, error) {
 	if r.Stream == nil {
 		r.buf = make([]byte, bufSize)
-		iv := make([]byte, r.IVSize())
+		iv := r.buf[:r.IVSize()]
+
 		if _, err := io.ReadFull(r.Reader, iv); err != nil {
 			return 0, err
 		}
@@ -100,11 +102,16 @@ func (r *reader) Read(b []byte) (int, error) {
 	}
 
 	n, err := r.Reader.Read(b)
+
 	if err != nil {
 		return 0, err
 	}
-	b = b[:n]
-	r.XORKeyStream(b, b)
+
+	if n > 0 {
+		b = b[:n]
+		r.XORKeyStream(b, b)
+	}
+
 	return n, nil
 }
 
@@ -112,6 +119,14 @@ func (r *reader) WriteTo(w io.Writer) (n int64, err error) {
 	for {
 		buf := r.buf
 		nr, er := r.Read(buf)
+
+		if er != nil {
+			if er != io.EOF { // ignore EOF as per io.Copy contract (using src.WriteTo shortcut)
+				err = er
+			}
+			return
+		}
+
 		if nr > 0 {
 			nw, ew := w.Write(buf[:nr])
 			n += int64(nw)
@@ -120,13 +135,6 @@ func (r *reader) WriteTo(w io.Writer) (n int64, err error) {
 				err = ew
 				return
 			}
-		}
-
-		if er != nil {
-			if er != io.EOF { // ignore EOF as per io.Copy contract (using src.WriteTo shortcut)
-				err = er
-			}
-			return
 		}
 	}
 }
@@ -169,15 +177,15 @@ type closeReader interface {
 }
 
 func (c *conn) CloseRead() error {
-	if c, ok := c.Conn.(closeReader); ok {
-		return c.CloseRead()
+	if cr, ok := c.Conn.(closeReader); ok {
+		return cr.CloseRead()
 	}
 	return nil
 }
 
 func (c *conn) CloseWrite() error {
-	if c, ok := c.Conn.(closeWriter); ok {
-		return c.CloseWrite()
+	if cw, ok := c.Conn.(closeWriter); ok {
+		return cw.CloseWrite()
 	}
 	return nil
 }
