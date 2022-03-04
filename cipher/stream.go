@@ -47,17 +47,17 @@ func aesCFB(key []byte) (stream.Cipher, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ctrStream{blk}, nil
+	return &cfbStream{blk}, nil
 }
 
 type chacha20ietfkey []byte
 
 func (k chacha20ietfkey) IVSize() int { return chacha20.INonceSize }
 func (k chacha20ietfkey) Encrypter(iv []byte) cipher.Stream {
-	ciph, err := chacha20.New(k, iv)
+	cs, err := chacha20.New(k, iv)
 	if err != nil {
 		panic(err)
 	}
-	return ciph
+	return cs
 }
 func (k chacha20ietfkey) Decrypter(iv []byte) cipher.Stream { return k.Encrypter(iv) }
