@@ -22,6 +22,7 @@ func streamConn(cipher stream.Cipher) netp.ConnCipher {
 	return func(c net.Conn) net.Conn { return stream.NewConn(c, cipher) }
 }
 
+// Counter (CTR) mode.
 type ctrStream struct{ cipher.Block }
 
 func (b *ctrStream) IVSize() int                       { return b.BlockSize() }
@@ -36,6 +37,7 @@ func aesCTR(key []byte) (stream.Cipher, error) {
 	return &ctrStream{blk}, nil
 }
 
+// CFB (Cipher Feedback) Mode.
 type cfbStream struct{ cipher.Block }
 
 func (b *cfbStream) IVSize() int                       { return b.BlockSize() }
@@ -50,6 +52,7 @@ func aesCFB(key []byte) (stream.Cipher, error) {
 	return &cfbStream{blk}, nil
 }
 
+// ChaCha20 stream cipher.
 type chacha20ietfkey []byte
 
 func (k chacha20ietfkey) IVSize() int { return chacha20.INonceSize }
