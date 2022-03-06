@@ -19,8 +19,8 @@ import (
 	"strings"
 	"syscall"
 
-	"efp/cipher"
-	"efp/relay"
+	"github.com/fujiawei-dev/efp/cipher"
+	"github.com/fujiawei-dev/efp/relay"
 )
 
 var flags struct {

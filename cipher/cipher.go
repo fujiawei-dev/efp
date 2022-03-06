@@ -17,8 +17,8 @@ import (
 
 	"golang.org/x/crypto/chacha20poly1305"
 
-	netp "efp/net"
-	"efp/net/crypto/stream"
+	netp "github.com/fujiawei-dev/efp/net"
+	"github.com/fujiawei-dev/efp/net/crypto/stream"
 )
 
 // List of AEAD ciphers: key size in bytes and constructor

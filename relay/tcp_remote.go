@@ -10,8 +10,8 @@ package relay
 import (
 	"net"
 
-	netp "efp/net"
-	"efp/net/socks"
+	netp "github.com/fujiawei-dev/efp/net"
+	"github.com/fujiawei-dev/efp/net/socks"
 )
 
 func NewTCPRemoteProxyServer(addr string, cipher netp.ConnCipher) {

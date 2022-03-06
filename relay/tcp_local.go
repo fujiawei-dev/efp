@@ -10,8 +10,8 @@ package relay
 import (
 	"net"
 
-	netp "efp/net"
-	"efp/net/socks"
+	netp "github.com/fujiawei-dev/efp/net"
+	"github.com/fujiawei-dev/efp/net/socks"
 )
 
 // NewSOCKS5ProxyClient Create a SOCKS5 server listening on address and proxy to server.

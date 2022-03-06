@@ -10,7 +10,7 @@ package cipher
 import (
 	"net"
 
-	netp "efp/net"
+	netp "github.com/fujiawei-dev/efp/net"
 )
 
 // Dummy ciphers (no encryption)

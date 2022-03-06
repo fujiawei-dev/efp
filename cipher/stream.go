@@ -14,8 +14,8 @@ import (
 
 	"gitlab.com/yawning/chacha20.git"
 
-	netp "efp/net"
-	"efp/net/crypto/stream"
+	netp "github.com/fujiawei-dev/efp/net"
+	"github.com/fujiawei-dev/efp/net/crypto/stream"
 )
 
 // Stream ciphers

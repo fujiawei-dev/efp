@@ -1,4 +1,4 @@
-module efp
+module github.com/fujiawei-dev/efp
 
 go 1.16
 

@@ -8,10 +8,10 @@
 package tests
 
 import (
-	"efp/cipher"
-	"efp/relay"
 	"encoding/base64"
 	"encoding/hex"
+	"github.com/fujiawei-dev/efp/cipher"
+	"github.com/fujiawei-dev/efp/relay"
 	"testing"
 )
 

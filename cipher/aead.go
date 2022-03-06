@@ -12,8 +12,8 @@ import (
 	"crypto/cipher"
 	"net"
 
-	netp "efp/net"
-	"efp/net/crypto/aead"
+	netp "github.com/fujiawei-dev/efp/net"
+	"github.com/fujiawei-dev/efp/net/crypto/aead"
 )
 
 // AEAD ciphers
