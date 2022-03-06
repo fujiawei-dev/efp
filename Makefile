@@ -6,7 +6,7 @@
 .IGNORE: clean;			# ignore all errors, keep going
 
 APP_NAME = efp
-APP_VERSION = 0.0.4
+APP_VERSION = 0.0.5
 
 BIN_DIR = bin
 

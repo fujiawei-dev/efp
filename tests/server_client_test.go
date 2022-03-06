@@ -10,9 +10,10 @@ package tests
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"testing"
+
 	"github.com/fujiawei-dev/efp/cipher"
 	"github.com/fujiawei-dev/efp/relay"
-	"testing"
 )
 
 func StartServerAndClient(clientAddr, serverAddr, cipherType string, key []byte, password string) error {
