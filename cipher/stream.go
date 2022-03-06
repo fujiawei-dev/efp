@@ -68,8 +68,5 @@ func (k chacha20ietfkey) Encrypter(iv []byte) cipher.Stream {
 func (k chacha20ietfkey) Decrypter(iv []byte) cipher.Stream { return k.Encrypter(iv) }
 
 func newChacha20ietf(key []byte) (stream.Cipher, error) {
-	if len(key) != chacha20.KeySize {
-		return nil, ErrKeySize
-	}
 	return chacha20ietfkey(key), nil
 }

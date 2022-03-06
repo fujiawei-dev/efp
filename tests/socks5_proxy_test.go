@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"testing"
 )
 
 func RequestWithProxy(urlString string) ([]byte, error) {
@@ -45,11 +44,11 @@ func RequestWithProxy(urlString string) ([]byte, error) {
 	return body, nil
 }
 
-func TestSOCKS5Proxy(t *testing.T) {
-	body, err := RequestWithProxy("socks5://localhost:1080")
-	if err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("%s", body)
-	}
-}
+// func TestSOCKS5Proxy(t *testing.T) {
+// 	body, err := RequestWithProxy("socks5://localhost:1080")
+// 	if err != nil {
+// 		t.Error(err)
+// 	} else {
+// 		t.Logf("%s", body)
+// 	}
+// }

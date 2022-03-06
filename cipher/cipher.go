@@ -9,7 +9,7 @@ package cipher
 
 import (
 	"crypto/cipher"
-	"errors"
+	"crypto/md5"
 	"fmt"
 	"io"
 	"sort"
@@ -20,12 +20,6 @@ import (
 	netp "efp/net"
 	"efp/net/crypto/stream"
 )
-
-// ErrKeySize means the key size does not meet the requirement of cipher.
-var ErrKeySize = errors.New("key size error")
-
-// ErrCipherNotSupported means the cipher has not been implemented.
-var ErrCipherNotSupported = errors.New("cipher not supported")
 
 // List of AEAD ciphers: key size in bytes and constructor
 var aeadList = map[string]struct {
@@ -85,28 +79,46 @@ func PrintCiphers(w io.Writer) {
 	}
 }
 
-func New(cipherType string, key []byte) (netp.ConnCipher, error) {
+func New(cipherType string, key []byte, password string) (netp.ConnCipher, error) {
 	cipherType = strings.ToLower(cipherType)
 
-	if cipherType == "dummy" {
+	if cipherType == "dummy" || cipherType == "" || (len(key) == 0 && password == "") {
 		return dummyConnCipher(), nil
 	}
 
 	if choice, ok := aeadList[cipherType]; ok {
-		if len(key) != choice.KeySize {
-			return nil, ErrKeySize
+		if len(key) == 0 {
+			key = kdf(password, choice.KeySize)
+		} else if len(key) != choice.KeySize {
+			return nil, fmt.Errorf("key size error: need %d-byte key", choice.KeySize)
 		}
 		c, err := choice.New(key)
 		return aeadConnCipher(c), err
 	}
 
 	if choice, ok := streamList[cipherType]; ok {
-		if len(key) != choice.KeySize {
-			return nil, ErrKeySize
+		if len(key) == 0 {
+			key = kdf(password, choice.KeySize)
+		} else if len(key) != choice.KeySize {
+			return nil, fmt.Errorf("key size error: need %d-byte key", choice.KeySize)
 		}
 		c, err := choice.New(key)
 		return streamConnCipher(c), err
 	}
 
-	return nil, ErrCipherNotSupported
+	return nil, fmt.Errorf("cipher %q not supported", cipherType)
+}
+
+// key-derivation function from original Shadowsocks
+func kdf(password string, keyLen int) []byte {
+	var b, prev []byte
+	h := md5.New()
+	for len(b) < keyLen {
+		h.Write(prev)
+		h.Write([]byte(password))
+		b = h.Sum(b)
+		prev = b[len(b)-h.Size():]
+		h.Reset()
+	}
+	return b[:keyLen]
 }

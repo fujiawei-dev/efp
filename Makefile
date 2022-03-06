@@ -6,7 +6,7 @@
 .IGNORE: clean;			# ignore all errors, keep going
 
 APP_NAME = efp
-APP_VERSION = 0.0.3
+APP_VERSION = 0.0.4
 
 BIN_DIR = bin
 
@@ -24,6 +24,9 @@ linux-armv8:
 
 clean:
 	rm $(BIN_DIR)/*
+
+test:
+	go test tests/server_client_test.go tests/socks5_proxy_test.go
 
 # ONLY FOR TESTING!
 
@@ -45,8 +48,10 @@ deploy-server:
 RUN_AS_CLIENT = $(APP_NAME) -c $(HOST):${PORT} -cipher ${CIPHER} -key ${KEY} -socks :1080 -v
 COPY_SRC_TO_DST = bin/$(APP_NAME)-windows-amd64.exe c:/developer/bin/$(APP_NAME).exe
 
-deploy-client:
+deploy-client-install install:
 	cp $(COPY_SRC_TO_DST)
+
+deploy-client: install
 	$(RUN_AS_CLIENT)
 
 deploy-test: all deploy-server deploy-client
