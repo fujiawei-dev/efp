@@ -6,7 +6,7 @@
 .IGNORE: clean;			# ignore all errors, keep going
 
 APP_NAME = efp
-APP_VERSION = 0.0.2
+APP_VERSION = 0.0.3
 
 BIN_DIR = bin
 
@@ -48,6 +48,8 @@ COPY_SRC_TO_DST = bin/$(APP_NAME)-windows-amd64.exe c:/developer/bin/$(APP_NAME)
 deploy-client:
 	cp $(COPY_SRC_TO_DST)
 	$(RUN_AS_CLIENT)
+
+deploy-test: all deploy-server deploy-client
 
 tag:
 	git tag v$(APP_VERSION)

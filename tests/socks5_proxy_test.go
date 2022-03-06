@@ -14,11 +14,10 @@ import (
 	"testing"
 )
 
-func TestSOCK5Proxy(t *testing.T) {
-	proxyUrl, err := url.Parse("socks5://localhost:1080")
+func RequestWithProxy(urlString string) ([]byte, error) {
+	proxyUrl, err := url.Parse(urlString)
 	if err != nil {
-		t.Error(err)
-		return
+		return nil, err
 	}
 
 	proxyClient := &http.Client{
@@ -33,17 +32,24 @@ func TestSOCK5Proxy(t *testing.T) {
 
 	response, err := proxyClient.Get("https://www.baidu.com")
 	if err != nil {
-		t.Error(err)
-		return
+		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		t.Error(err)
-		return
+		return nil, err
 	}
 
 	defer response.Body.Close()
 
-	t.Logf("%s", body)
+	return body, nil
+}
+
+func TestSOCKS5Proxy(t *testing.T) {
+	body, err := RequestWithProxy("socks5://localhost:1080")
+	if err != nil {
+		t.Error(err)
+	} else {
+		t.Logf("%s", body)
+	}
 }

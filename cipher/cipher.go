@@ -9,12 +9,16 @@ package cipher
 
 import (
 	"crypto/cipher"
-	"efp/net/crypto/stream"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/chacha20poly1305"
 	"io"
 	"sort"
+	"strings"
+
+	"golang.org/x/crypto/chacha20poly1305"
+
+	netp "efp/net"
+	"efp/net/crypto/stream"
 )
 
 // ErrKeySize means the key size does not meet the requirement of cipher.
@@ -79,4 +83,30 @@ func PrintCiphers(w io.Writer) {
 	for _, name := range stream {
 		fmt.Fprintf(w, "%s\n", name)
 	}
+}
+
+func New(cipherType string, key []byte) (netp.ConnCipher, error) {
+	cipherType = strings.ToLower(cipherType)
+
+	if cipherType == "dummy" {
+		return dummyConnCipher(), nil
+	}
+
+	if choice, ok := aeadList[cipherType]; ok {
+		if len(key) != choice.KeySize {
+			return nil, ErrKeySize
+		}
+		c, err := choice.New(key)
+		return aeadConnCipher(c), err
+	}
+
+	if choice, ok := streamList[cipherType]; ok {
+		if len(key) != choice.KeySize {
+			return nil, ErrKeySize
+		}
+		c, err := choice.New(key)
+		return streamConnCipher(c), err
+	}
+
+	return nil, ErrCipherNotSupported
 }

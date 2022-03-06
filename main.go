@@ -56,7 +56,7 @@ func main() {
 		log.Fatalf("failed to parse key, %v", err)
 	}
 
-	connCipher, err := cipher.PickCipher(flags.Cipher, key)
+	connCipher, err := cipher.New(flags.Cipher, key)
 	if err != nil {
 		log.Fatalf("failed to create cipher %s, %v", flags.Cipher, err)
 	}
