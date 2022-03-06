@@ -43,7 +43,7 @@ func NewWriter(w io.Writer, aead cipher.AEAD) io.Writer {
 func (w *writer) init() error {
 	w.buf = make([]byte, 2+w.Overhead()+payloadSizeMask+w.Overhead())
 	w.nonce = make([]byte, w.NonceSize())
-	_, err := io.ReadFull(rand.Reader, w.nonce)
+	_, err := rand.Read(w.nonce)
 	if err != nil {
 		return err
 	}
@@ -66,29 +66,29 @@ func (w *writer) ReadFrom(r io.Reader) (n int64, err error) {
 		payloadBuf := buf[2+w.Overhead() : 2+w.Overhead()+payloadSizeMask]
 		nr, er := r.Read(payloadBuf)
 
+		if er != nil {
+			if er != io.EOF { // ignore EOF as per io.ReaderFrom contract
+				err = er
+			}
+			break
+		}
+
 		if nr > 0 {
 			n += int64(nr)
-			buf = buf[:2+w.Overhead()+nr+w.Overhead()]
 			payloadBuf = payloadBuf[:nr]
+			buf = buf[:2+w.Overhead()+nr+w.Overhead()]
 			buf[0], buf[1] = byte(nr>>8), byte(nr) // big-endian payload size
+
 			w.Seal(buf[:0], w.nonce, buf[:2], nil)
 			increment(w.nonce)
 
 			w.Seal(payloadBuf[:0], w.nonce, payloadBuf, nil)
 			increment(w.nonce)
 
-			_, ew := w.Writer.Write(buf)
-			if ew != nil {
+			if _, ew := w.Writer.Write(buf); ew != nil {
 				err = ew
 				break
 			}
-		}
-
-		if er != nil {
-			if er != io.EOF { // ignore EOF as per io.ReaderFrom contract
-				err = er
-			}
-			break
 		}
 	}
 
@@ -185,6 +185,14 @@ func (r *reader) Read(b []byte) (int, error) {
 func (r *reader) WriteTo(w io.Writer) (n int64, err error) {
 	for {
 		nr, er := r.read()
+
+		if er != nil {
+			if er != io.EOF { // ignore EOF as per io.Copy contract (using src.WriteTo shortcut)
+				err = er
+			}
+			break
+		}
+
 		if nr > 0 {
 			nw, ew := w.Write(r.buf[:nr])
 			n += int64(nw)
@@ -193,13 +201,6 @@ func (r *reader) WriteTo(w io.Writer) (n int64, err error) {
 				err = ew
 				break
 			}
-		}
-
-		if er != nil {
-			if er != io.EOF { // ignore EOF as per io.Copy contract (using src.WriteTo shortcut)
-				err = er
-			}
-			break
 		}
 	}
 
