@@ -33,13 +33,18 @@ var flags struct {
 func main() {
 	flag.StringVar(&flags.Client, "c", "", "client connect address")
 	flag.StringVar(&flags.Server, "s", "", "server listen address")
-	flag.StringVar(&flags.Cipher, "cipher", "dummy", "cipher to encrypt/decrypt")
+	flag.StringVar(&flags.Cipher, "cipher", "", "cipher to encrypt/decrypt")
 	flag.StringVar(&flags.Key, "key", "", "secret key in hexadecimal")
 	flag.StringVar(&flags.Socks, "socks", ":1080", "(client-only) SOCKS listen address")
 	flag.StringVar(&flags.TCPTunnel, "tcptunnel", "", "(client-only) TCP tunnel (laddr1=raddr1,laddr2=raddr2,...)")
 	flag.BoolVar(&flags.Verbose, "v", false, "verbose mode")
 
 	flag.Parse()
+
+	if flags.Cipher == "" {
+		cipher.PrintCiphers(os.Stderr)
+		return
+	}
 
 	if flags.Client == "" && flags.Server == "" {
 		flag.Usage()

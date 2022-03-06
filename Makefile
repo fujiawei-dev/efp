@@ -6,7 +6,7 @@
 .IGNORE: clean;			# ignore all errors, keep going
 
 APP_NAME = efp
-APP_VERSION = 0.0.1
+APP_VERSION = 0.0.2
 
 BIN_DIR = bin
 
@@ -14,7 +14,7 @@ BUILD_CMD = go build -ldflags '-w -s -buildid='
 # The -w and -s flags reduce binary sizes by excluding unnecessary symbols and debug info
 # The -buildid= flag makes builds reproducible
 
-all: windows-amd64 linux-armv8
+all: clean windows-amd64 linux-armv8
 
 windows-amd64:
 	GOARCH=amd64 GOOS=windows $(BUILD_CMD) -o $(BIN_DIR)/$(APP_NAME)-$@.exe

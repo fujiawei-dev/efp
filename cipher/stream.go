@@ -18,7 +18,9 @@ import (
 	"efp/net/crypto/stream"
 )
 
-func streamConn(cipher stream.Cipher) netp.ConnCipher {
+// Stream ciphers
+
+func streamConnCipher(cipher stream.Cipher) netp.ConnCipher {
 	return func(c net.Conn) net.Conn { return stream.NewConn(c, cipher) }
 }
 
@@ -52,15 +54,22 @@ func aesCFB(key []byte) (stream.Cipher, error) {
 	return &cfbStream{blk}, nil
 }
 
-// ChaCha20 stream cipher.
+// IETF-variant of chacha20
 type chacha20ietfkey []byte
 
 func (k chacha20ietfkey) IVSize() int { return chacha20.INonceSize }
 func (k chacha20ietfkey) Encrypter(iv []byte) cipher.Stream {
 	cs, err := chacha20.New(k, iv)
 	if err != nil {
-		panic(err)
+		panic(err) // should never happen
 	}
 	return cs
 }
 func (k chacha20ietfkey) Decrypter(iv []byte) cipher.Stream { return k.Encrypter(iv) }
+
+func newChacha20ietf(key []byte) (stream.Cipher, error) {
+	if len(key) != chacha20.KeySize {
+		return nil, ErrKeySize
+	}
+	return chacha20ietfkey(key), nil
+}

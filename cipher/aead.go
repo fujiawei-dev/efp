@@ -16,17 +16,26 @@ import (
 	"efp/net/crypto/aead"
 )
 
-func aeadConn(cipher cipher.AEAD) netp.ConnCipher {
+// AEAD ciphers
+
+func aeadConnCipher(cipher cipher.AEAD) netp.ConnCipher {
 	return func(c net.Conn) net.Conn { return aead.NewConn(c, cipher) }
 }
 
-func aesGCM(key []byte, nonceSize int) (cipher.AEAD, error) {
+// AES-GCM with standard 12-byte nonce
+func aesGCM(key []byte) (cipher.AEAD, error) {
 	blk, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	if nonceSize > 0 {
-		return cipher.NewGCMWithNonceSize(blk, nonceSize)
+	return cipher.NewGCM(blk)
+}
+
+// AES-GCM with 16-byte nonce for better collision avoidance
+func aesGCM16(key []byte) (cipher.AEAD, error) {
+	blk, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
 	}
-	return cipher.NewGCM(blk) // standard 12-byte nonce
+	return cipher.NewGCMWithNonceSize(blk, 16)
 }
